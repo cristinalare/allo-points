@@ -26,18 +26,20 @@ export const Button = ({
   type,
   onClick,
   isLoading,
+  className,
   children,
 }: {
   type: "primary" | "secondary";
   onClick?: () => void;
   isLoading?: boolean;
+  className?: string;
   children: ReactNode;
 }) => {
   return (
     <button
       disabled={!!isLoading}
       onClick={onClick}
-      className={button({ type, isLoading: !!isLoading })}
+      className={`${button({ type, isLoading: !!isLoading })} ${className}`}
     >
       {children}
     </button>

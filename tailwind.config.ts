@@ -1,5 +1,6 @@
 import type { Config } from "tailwindcss";
 const { withTV } = require("tailwind-variants/transformer");
+const defaultTheme = require("tailwindcss/defaultTheme");
 
 const config: Config = {
   content: [
@@ -9,6 +10,10 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        founders: ["var(--font-founders)", ...defaultTheme.fontFamily.sans],
+        mono: ["var(--font-dm-mono)", ...defaultTheme.fontFamily.mono],
+      },
       backgroundImage: {
         "allo-bg": "url('/allo-bg.svg')",
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
