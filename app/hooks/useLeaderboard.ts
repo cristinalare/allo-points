@@ -3,6 +3,10 @@ import { LeaderboardFilter, LeaderboardItem } from "../types";
 import { LEADERBOARD_PAGE_SIZE } from "../constants";
 
 export const useLeaderboard = (leaderboardSelectedPage: number) => {
+  const THIS_WEEK_EXECUTION_ID = "01J94ZE3V7YZZVFMCGMXG42JVB";
+  const LAST_WEEK_EXECUTION_ID = "01J94ZGMXM6JTBH2WV0JNW75WG";
+  const ALL_TIME_EXECUTION_ID = "01J94ZV2GM9XY0REJCWWXFD5X4";
+
   const [leaderboardTotalResults, setLeaderboardTotalResults] =
     useState<number>(0);
   const [isLeaderboardLoading, setIsLeaderboardLoading] = useState(false);
@@ -30,6 +34,11 @@ export const useLeaderboard = (leaderboardSelectedPage: number) => {
   async function getLeaderboardData(offset: number) {
     setIsLeaderboardLoading(true);
     try {
+      const queryParams = {
+        limit: LEADERBOARD_PAGE_SIZE.toString(),
+        offset: offset.toString(),
+      };
+
       const options = {
         method: "GET",
         headers: {
@@ -37,13 +46,14 @@ export const useLeaderboard = (leaderboardSelectedPage: number) => {
         },
       };
 
-      const queryParams = {
-        time_range: selectedFilter,
-        limit: LEADERBOARD_PAGE_SIZE.toString(),
-        offset: offset.toString(),
-      };
-      const queryId = process.env.NEXT_PUBLIC_LEADERBOARD_API;
-      const url = `https://api.dune.com/api/v1/query/${queryId}/results?${new URLSearchParams(
+      const executionIdSelected =
+        selectedFilter === LeaderboardFilter.ALL_TIME
+          ? ALL_TIME_EXECUTION_ID
+          : selectedFilter === LeaderboardFilter.LAST_WEEK
+          ? LAST_WEEK_EXECUTION_ID
+          : THIS_WEEK_EXECUTION_ID;
+
+      const url = `https://api.dune.com/api/v1/execution/${executionIdSelected}/results?${new URLSearchParams(
         queryParams
       ).toString()}`;
 
