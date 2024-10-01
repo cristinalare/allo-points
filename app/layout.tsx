@@ -6,6 +6,7 @@ import "react-tooltip/dist/react-tooltip.css";
 import { Providers } from "./providers";
 import { Header } from "./components/header";
 import localFont from "next/font/local";
+import { Footer } from "./components/footer";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -28,7 +29,7 @@ const mono = DM_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Allo Points",
+  title: "Allo Leaderboard",
   description: "",
 };
 
@@ -46,6 +47,7 @@ export default function RootLayout({
         <Providers>
           <Header />
           {children}
+          <Footer />
         </Providers>
       </body>
     </html>

@@ -37,7 +37,6 @@ export default function Start() {
   const [leaderboardSelectedPage, setLeaderboardSelectedPage] = useState(1);
   const {
     isLeaderboardLoading,
-    leaderboardCurrentPage,
     leaderboardTotalResults,
     leaderboardData,
     filters,
@@ -56,19 +55,30 @@ export default function Start() {
   } = usePointsBreakdown(pointsBreakdownSelectedPage, address);
 
   const getPointsByAddress = async (address: string) => {
-    let apiParams: CustomAPIParams = {
-      handle: "gitcoin_dao",
-      slug: "fake-allo-points-leaderboard",
+    const options = {
+      method: "GET",
+      headers: {
+        "X-DUNE-API-KEY": process.env.NEXT_PUBLIC_DUNE_API_KEY ?? "",
+      },
     };
-    if (isAddress(address))
-      apiParams = { ...apiParams, filters: `address =  '${address}'` };
-    else apiParams = { ...apiParams, filters: `ens = '${address}'` };
 
-    const client = new DuneClient(
-      process.env.NEXT_PUBLIC_LEADERBOARD_API ?? ""
-    );
-    const results = await client.custom.getResults(apiParams);
-    const points = (results?.result?.rows[0]?.number_of_points as number) ?? 0;
+    let queryParams: any;
+    if (isAddress(address))
+      queryParams = { ...queryParams, filters: `address =  '${address}'` };
+    else queryParams = { ...queryParams, filters: `ens = '${address}'` };
+
+    const queryId = process.env.NEXT_PUBLIC_LEADERBOARD_API;
+    const url = `https://api.dune.com/api/v1/query/${queryId}/results?${new URLSearchParams(
+      queryParams
+    ).toString()}`;
+
+    const resp = await fetch(url, options);
+    if (!resp.ok) {
+      throw new Error(resp.statusText);
+    }
+    const results = await resp.json();
+
+    const points = (results?.result?.rows[0]?.total_points as number) ?? 0;
     setPoints(points);
     !!points && (await getPointBreakdownByAddress(address));
   };
@@ -109,7 +119,7 @@ export default function Start() {
         <Leaderboard
           currentUserAddress={userAddress}
           data={leaderboardData}
-          currentPage={leaderboardCurrentPage}
+          currentPage={leaderboardSelectedPage}
           handlePageChange={(val: number) => {
             setLeaderboardSelectedPage(val);
           }}
@@ -123,8 +133,6 @@ export default function Start() {
           <Faq />
         </section>
       </div>
-
-      <Footer />
 
       {/* modals */}
       <BreakdownModal
@@ -306,14 +314,14 @@ const BreakdownModal = ({
 }) => {
   const getActionFromRole = (role: Role) => {
     switch (role) {
-      case Role.CONTRACT_DEPLOYER:
-        return "contract deployed";
-      case Role.DONOR:
-        return "donation";
-      case Role.GRANT_OWNER:
-        return "grant owner";
-      case Role.ROUND_OWNER:
-        return "round owner";
+      case Role.CONTRIBUTOR:
+        return "contributor";
+      case Role.COTRACT_DEV:
+        return "contract dev";
+      case Role.GRANTEE:
+        return "grantee";
+      case Role.ROUND_OPERATOR:
+        return "round operator";
     }
   };
 
@@ -352,9 +360,11 @@ const BreakdownModal = ({
             <div>
               {data.map((entry) => (
                 <div className="" key={entry.txHash}>
-                  <span className="text-grey-400 mr-2">{entry.timestamp}</span>
+                  <span className="text-grey-400 mr-2">
+                    {new Date(entry.timestamp).toDateString()}
+                  </span>
                   <span className="text-blue-800 font-medium">
-                    {formatNumber(entry.numberOfPoints)} pts for{" "}
+                    {formatNumber(entry.numberOfPoints)} pts -{" "}
                     {getActionFromRole(entry.role)}
                   </span>
                 </div>
@@ -364,14 +374,14 @@ const BreakdownModal = ({
                   isDataLoading ? "pointer-events-none opacity-60" : ""
                 }`}
               >
-                <Pagination
+                {/* <Pagination
                   currentPage={currentPage}
                   handlePageChange={(val: number) => {
                     handlePageChange(val);
                   }}
                   totalResults={pointBreakdownTotalEntries}
                   pageSize={POINTS_BREAKDOWN_PAGE_SIZE}
-                />
+                /> */}
               </div>
             </div>
           )}

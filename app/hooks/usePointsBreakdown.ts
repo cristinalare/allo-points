@@ -1,8 +1,5 @@
 import { useState } from "react";
 import { PointsBreakdownItem } from "../types";
-import { POINTS_BREAKDOWN_PAGE_SIZE } from "../constants";
-import { CustomAPIParams, DuneClient } from "@duneanalytics/client-sdk";
-import { isAddress } from "viem";
 
 export const usePointsBreakdown = (currentPage: number, address?: string) => {
   const [pointsBreakdownCurrentPage, setPointsBreakdownCurrentPage] =
@@ -17,24 +14,28 @@ export const usePointsBreakdown = (currentPage: number, address?: string) => {
     setIsLoading(true);
 
     try {
-      const offset =
-        (pointsBreakdownCurrentPage - 1) * POINTS_BREAKDOWN_PAGE_SIZE;
-      let apiParams: CustomAPIParams = {
-        handle: "gitcoin_dao",
-        slug: "fake-allo-points-events",
-        limit: POINTS_BREAKDOWN_PAGE_SIZE,
-        offset,
+      const options = {
+        method: "GET",
+        headers: {
+          "X-DUNE-API-KEY": process.env.NEXT_PUBLIC_DUNE_API_KEY ?? "",
+        },
       };
-      if (isAddress(address))
-        apiParams = { ...apiParams, filters: `address =  '${address}'` };
-      else apiParams = { ...apiParams, filters: `ens = '${address}'` };
 
-      const client = new DuneClient(
-        process.env.NEXT_PUBLIC_POINTS_EVENTS_API ?? ""
-      );
-      const results = await client.custom.getResults(apiParams);
+      const queryParams = new URLSearchParams({
+        lookup_address: address,
+      });
+      const queryId = process.env.NEXT_PUBLIC_POINTS_EVENTS_API;
+      const url = `https://api.dune.com/api/v1/query/${queryId}/results?${queryParams}`;
+
+      const resp = await fetch(url, options);
+      if (!resp.ok) {
+        throw new Error(resp.statusText);
+      }
+      const results = await resp.json();
+
       const data = results.result?.rows?.map((entry: any) => ({
         address: entry.address,
+        blockchain: entry.blockchain,
         ens: entry.ens,
         numberOfPoints: entry.number_of_points,
         txHash: entry.tx_hash,

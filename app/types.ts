@@ -7,16 +7,16 @@ export interface LeaderboardItem {
 }
 
 export enum LeaderboardFilter {
-  THIS_WEEK = "current-week",
-  LAST_WEEK = "last-week",
-  ALL_TIME = "all-time",
+  THIS_WEEK = "this week",
+  LAST_WEEK = "last week",
+  ALL_TIME = "all time",
 }
 
 export enum Role {
-  DONOR = "donor",
-  ROUND_OWNER = "round_owner",
-  CONTRACT_DEPLOYER = "contract_deployer",
-  GRANT_OWNER = "grant_owner",
+  COTRACT_DEV = "contract_dev",
+  GRANTEE = "grantee",
+  CONTRIBUTOR = "contributor",
+  ROUND_OPERATOR = "round_operator",
 }
 
 export interface PointsBreakdownItem {

@@ -1,12 +1,8 @@
 import { useEffect, useState } from "react";
 import { LeaderboardFilter, LeaderboardItem } from "../types";
-import { DuneClient } from "@duneanalytics/client-sdk";
 import { LEADERBOARD_PAGE_SIZE } from "../constants";
 
 export const useLeaderboard = (leaderboardSelectedPage: number) => {
-  const [leaderboardCurrentPage, setLeaderboardCurrentPage] = useState(
-    leaderboardSelectedPage
-  );
   const [leaderboardTotalResults, setLeaderboardTotalResults] =
     useState<number>(0);
   const [isLeaderboardLoading, setIsLeaderboardLoading] = useState(false);
@@ -34,15 +30,30 @@ export const useLeaderboard = (leaderboardSelectedPage: number) => {
   async function getLeaderboardData(offset: number) {
     setIsLeaderboardLoading(true);
     try {
-      const client = new DuneClient(
-        process.env.NEXT_PUBLIC_LEADERBOARD_API ?? ""
-      );
-      const results = await client.custom.getResults({
-        handle: "gitcoin_dao",
-        slug: "fake-allo-points-leaderboard",
-        limit: LEADERBOARD_PAGE_SIZE,
-        offset,
-      });
+      const options = {
+        method: "GET",
+        headers: {
+          "X-DUNE-API-KEY": process.env.NEXT_PUBLIC_DUNE_API_KEY ?? "",
+        },
+      };
+
+      const queryParams = {
+        time_range: selectedFilter,
+        limit: LEADERBOARD_PAGE_SIZE.toString(),
+        offset: offset.toString(),
+      };
+      const queryId = process.env.NEXT_PUBLIC_LEADERBOARD_API;
+      const url = `https://api.dune.com/api/v1/query/${queryId}/results?${new URLSearchParams(
+        queryParams
+      ).toString()}`;
+
+      const resp = await fetch(url, options);
+      if (!resp.ok) {
+        throw new Error(resp.statusText);
+      }
+      const results = await resp.json();
+
+      console.log(results);
 
       const totalEntries = results?.result?.metadata?.total_row_count ?? 0;
       setLeaderboardTotalResults(totalEntries);
@@ -52,8 +63,8 @@ export const useLeaderboard = (leaderboardSelectedPage: number) => {
           rank: row.rank,
           address: row.address,
           ens: row.ens,
-          numberOfPoints: row.number_of_points,
-          lastUpdated: row.last_updated,
+          numberOfPoints: row.total_points,
+          lastUpdated: row.last_timestamp,
         })) ?? []
       );
     } catch (err) {
@@ -63,17 +74,16 @@ export const useLeaderboard = (leaderboardSelectedPage: number) => {
     }
   }
 
-  useEffect(() => {
-    // TODO: fetch data based on filter
-  }, [selectedFilter]);
+  // useEffect(() => {
+  //   // TODO: fetch data based on filter
+  // }, [selectedFilter]);
 
   useEffect(() => {
-    getLeaderboardData((leaderboardCurrentPage - 1) * LEADERBOARD_PAGE_SIZE);
-  }, [leaderboardCurrentPage]);
+    getLeaderboardData((leaderboardSelectedPage - 1) * LEADERBOARD_PAGE_SIZE);
+  }, [leaderboardSelectedPage, selectedFilter]);
 
   return {
     isLeaderboardLoading,
-    leaderboardCurrentPage,
     leaderboardTotalResults,
     leaderboardData,
     filters,
