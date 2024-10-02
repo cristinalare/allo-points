@@ -31,6 +31,13 @@ const mono = DM_Mono({
 export const metadata: Metadata = {
   title: "Allo Leaderboard",
   description: "",
+  icons: {
+    icon: "https://assets-global.website-files.com/6433c5d029c6bb75f3f00bd5/6433c5d029c6bb9127f00c07_gitcoin-fav3.png",
+    shortcut:
+      "https://assets-global.website-files.com/6433c5d029c6bb75f3f00bd5/6433c5d029c6bb9127f00c07_gitcoin-fav3.png",
+    apple:
+      "https://assets-global.website-files.com/6433c5d029c6bb75f3f00bd5/6433c5d029c6bb9127f00c07_gitcoin-fav3.png",
+  },
 };
 
 export default function RootLayout({
