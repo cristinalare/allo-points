@@ -9,21 +9,31 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export const Header = () => (
-  <header className="px-6 bg-black flex items-center justify-between sm:gap-16 gap-6 py-2">
+  <header className="sm:px-6 px-2 bg-black flex items-center justify-between sm:gap-16 gap-6 py-2">
     <div className="flex items-center sm:gap-16 gap-6">
-      <Image src="/allo-logo.svg" alt="Allo logo" width={74} height={20} />
+      <Image
+        src="/allo-logo.svg"
+        alt="Allo logo"
+        width={74}
+        height={20}
+        className="sm:max-h-none max-h-[15px] w-auto"
+      />
       <div className="sm:hidden">
         <DropdownMenu>
           <DropdownMenuTrigger className="text-white font-semibold">
             <div className="flex items-center gap-2">
-              Experts
+              Leaderboard
               <Image alt="" width="12" height="11" src="/down-icon.svg" />
             </div>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="bg-black">
             <DropdownMenuItem>
-              <Link href="/" target="_blank" className="w-full">
-                Leaderboard
+              <Link
+                href="https://alloexperts.gitcoin.co"
+                target="_blank"
+                className="w-full"
+              >
+                Experts
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem>
@@ -42,7 +52,7 @@ export const Header = () => (
         <ul className="font-semibold flex items-center sm:gap-8 gap-4 text-white">
           <li>
             <Link
-              href="https://www.google.com/"
+              href="https://alloexperts.gitcoin.co"
               target="_blank"
               className="link white"
             >
@@ -50,11 +60,7 @@ export const Header = () => (
             </Link>
           </li>
           <li>
-            <Link
-              href="https://www.google.com/"
-              target="_blank"
-              className="link white selected"
-            >
+            <Link href="/" className="link white selected">
               Leaderboard
             </Link>
           </li>

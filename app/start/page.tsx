@@ -127,7 +127,10 @@ export default function Start() {
           isDataLoading={isLeaderboardLoading}
           filters={filters}
           selectedFilter={selectedFilter}
-          setSelectedFilter={setSelectedFilter}
+          setSelectedFilter={(val) => {
+            setSelectedFilter(val);
+            setLeaderboardSelectedPage(1);
+          }}
         />
         <section ref={faqRef}>
           <Faq />
@@ -252,7 +255,7 @@ const CheckBalance = ({
   );
 
   return (
-    <section className="bg-allo-bg bg-top bg-no-repeat pt-24 pb-16 mb-4">
+    <section className="bg-allo-bg bg-top  pt-24 pb-16 mb-4 bg-auto">
       <div className="rounded-[32px] bg-blue-800 py-12 md:py-20 2xl:py-28 lg:px-28 sm:px-12 px-4 mx-auto max-w-4xl xl:w-[60vw] sm:w-[90vw] w-[96vw]">
         <div className="flex flex-col gap-6">
           <h1 className="text-4xl text-blue-200 font-semibold font-founders">
@@ -433,61 +436,82 @@ const Leaderboard = ({
         <h2 className="sm:text-4xl text-2xl text-blue-600 font-semibold font-founders">
           Leaderboard
         </h2>
-        <div className="flex items-center gap-1">
-          {filters.map((entry, index) => (
-            <div key={entry.value} className="flex items-center gap-1">
-              <button
-                onClick={() => setSelectedFilter(entry.value)}
-                className={selectedFilter == entry.value ? "font-bold" : ""}
-              >
-                {entry.label}
-              </button>
-              {index !== filters.length - 1 && <span>|</span>}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {data.map((entry) => (
         <div
-          key={entry.address}
-          className={`${
-            entry.address == currentUserAddress ? "[&_p]:text-blue-600" : ""
-          } sm:px-7 px-4 py-4 flex items-center justify-between odd:bg-grey-100 overflow-hidden gap-2`}
+          className={`${isDataLoading ? "pointer-events-none opacity-50" : ""}`}
         >
-          <div className="flex items-center gap-2">
-            <p className="sm:text-lg text-grey-400">#{entry.rank}</p>
-
-            <button
-              data-tooltip-id={entry.address}
-              data-tooltip-content="Address copied!"
-              className="sm:text-xl truncate line-clamp-1 font-mono"
-              onClick={() => {
-                visible ? hide : show;
-                copyToClipboard(entry.address);
-              }}
-            >
-              {entry.ens ? entry.ens : truncateAddress(entry.address)}
-            </button>
-            <Tooltip openOnClick id={entry.address} content="Address copied!" />
+          <div className="flex items-center gap-1">
+            {filters.map((entry, index) => (
+              <div key={entry.value} className="flex items-center gap-1">
+                <button
+                  onClick={() => setSelectedFilter(entry.value)}
+                  className={selectedFilter == entry.value ? "font-bold" : ""}
+                >
+                  {entry.label}
+                </button>
+                {index !== filters.length - 1 && <span>|</span>}
+              </div>
+            ))}
           </div>
-          <p className="sm:text-xl flex-shrink-0 font-founders">
-            {formatNumber(entry.numberOfPoints)} pts
-          </p>
         </div>
-      ))}
-      <div
-        className={`${isDataLoading ? "pointer-events-none opacity-60" : ""}`}
-      >
-        <Pagination
-          currentPage={currentPage}
-          handlePageChange={(val: number) => {
-            handlePageChange(val);
-          }}
-          totalResults={total}
-          pageSize={LEADERBOARD_PAGE_SIZE}
-        />
       </div>
+      <div
+        className={`${isDataLoading ? "pointer-events-none opacity-50" : ""}`}
+      >
+        {!data?.length && isDataLoading ? (
+          <div className="text-center font-mono">Loading...</div>
+        ) : !data?.length ? (
+          <div className="text-center font-mono">No results</div>
+        ) : (
+          data.map((entry) => (
+            <div
+              key={entry.address}
+              className={`${
+                entry.address == currentUserAddress ? "[&_p]:text-blue-600" : ""
+              } sm:px-7 px-4 py-4 flex items-center justify-between odd:bg-grey-100 overflow-hidden gap-2`}
+            >
+              <div className="flex items-center gap-2">
+                <p className="sm:text-lg text-grey-400">#{entry.rank}</p>
+
+                <button
+                  data-tooltip-id={entry.address}
+                  data-tooltip-content="Address copied!"
+                  className="sm:text-xl truncate line-clamp-1 font-mono"
+                  onClick={() => {
+                    visible ? hide : show;
+                    copyToClipboard(entry.address);
+                  }}
+                >
+                  {entry.ens ? entry.ens : truncateAddress(entry.address)}
+                </button>
+                <Tooltip
+                  openOnClick
+                  id={entry.address}
+                  content="Address copied!"
+                />
+              </div>
+              <p className="sm:text-xl flex-shrink-0 font-founders">
+                {formatNumber(entry.numberOfPoints)} pts
+              </p>
+            </div>
+          ))
+        )}
+      </div>
+      {!!total ? (
+        <div
+          className={`${isDataLoading ? "pointer-events-none opacity-50" : ""}`}
+        >
+          <Pagination
+            currentPage={currentPage}
+            handlePageChange={(val: number) => {
+              handlePageChange(val);
+            }}
+            totalResults={total}
+            pageSize={LEADERBOARD_PAGE_SIZE}
+          />
+        </div>
+      ) : (
+        ""
+      )}
     </section>
   );
 };

@@ -1,12 +1,9 @@
 import { useEffect, useState } from "react";
 import { LeaderboardFilter, LeaderboardItem } from "../types";
 import { LEADERBOARD_PAGE_SIZE } from "../constants";
+import { DuneClient, QueryParameter } from "@duneanalytics/client-sdk";
 
 export const useLeaderboard = (leaderboardSelectedPage: number) => {
-  const THIS_WEEK_EXECUTION_ID = "01J94ZE3V7YZZVFMCGMXG42JVB";
-  const LAST_WEEK_EXECUTION_ID = "01J94ZGMXM6JTBH2WV0JNW75WG";
-  const ALL_TIME_EXECUTION_ID = "01J94ZV2GM9XY0REJCWWXFD5X4";
-
   const [leaderboardTotalResults, setLeaderboardTotalResults] =
     useState<number>(0);
   const [isLeaderboardLoading, setIsLeaderboardLoading] = useState(false);
@@ -28,42 +25,23 @@ export const useLeaderboard = (leaderboardSelectedPage: number) => {
   ];
 
   const [selectedFilter, setSelectedFilter] = useState<LeaderboardFilter>(
-    LeaderboardFilter.THIS_WEEK
+    LeaderboardFilter.LAST_WEEK
   );
 
   async function getLeaderboardData(offset: number) {
     setIsLeaderboardLoading(true);
     try {
-      const queryParams = {
-        limit: LEADERBOARD_PAGE_SIZE.toString(),
-        offset: offset.toString(),
-      };
+      const client = new DuneClient(process.env.NEXT_PUBLIC_DUNE_API_KEY ?? "");
+      const queryId = Number(process.env.NEXT_PUBLIC_LEADERBOARD_API ?? "");
 
-      const options = {
-        method: "GET",
-        headers: {
-          "X-DUNE-API-KEY": process.env.NEXT_PUBLIC_DUNE_API_KEY ?? "",
-        },
-      };
-
-      const executionIdSelected =
-        selectedFilter === LeaderboardFilter.ALL_TIME
-          ? ALL_TIME_EXECUTION_ID
-          : selectedFilter === LeaderboardFilter.LAST_WEEK
-          ? LAST_WEEK_EXECUTION_ID
-          : THIS_WEEK_EXECUTION_ID;
-
-      const url = `https://api.dune.com/api/v1/execution/${executionIdSelected}/results?${new URLSearchParams(
-        queryParams
-      ).toString()}`;
-
-      const resp = await fetch(url, options);
-      if (!resp.ok) {
-        throw new Error(resp.statusText);
-      }
-      const results = await resp.json();
-
-      console.log(results);
+      const results = await client.runQuery({
+        queryId,
+        limit: LEADERBOARD_PAGE_SIZE,
+        offset,
+        query_parameters: [
+          QueryParameter.enum("time_range", `${selectedFilter}`),
+        ],
+      });
 
       const totalEntries = results?.result?.metadata?.total_row_count ?? 0;
       setLeaderboardTotalResults(totalEntries);
@@ -83,10 +61,6 @@ export const useLeaderboard = (leaderboardSelectedPage: number) => {
       setIsLeaderboardLoading(false);
     }
   }
-
-  // useEffect(() => {
-  //   // TODO: fetch data based on filter
-  // }, [selectedFilter]);
 
   useEffect(() => {
     getLeaderboardData((leaderboardSelectedPage - 1) * LEADERBOARD_PAGE_SIZE);
