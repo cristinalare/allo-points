@@ -29,9 +29,9 @@ export default function Home() {
 
           <Image
             src="/graphic.svg"
-            alt="Allo Protocol Logo"
-            width={343}
-            height={493}
+            alt=""
+            width={342}
+            height={492}
             priority
           />
         </div>
