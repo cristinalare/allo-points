@@ -17,7 +17,7 @@ export const Footer = () => (
           <ul className="font-semibold flex items-center gap-8">
             <li>
               <Link
-                href="https://www.google.com/"
+                href="https://alloexperts.gitcoin.co"
                 target="_blank"
                 className="link"
               >
@@ -25,11 +25,7 @@ export const Footer = () => (
               </Link>
             </li>
             <li>
-              <Link
-                href="https://www.google.com/"
-                target="_blank"
-                className="link selected"
-              >
+              <Link href="/" className="link selected">
                 Leaderboard
               </Link>
             </li>
